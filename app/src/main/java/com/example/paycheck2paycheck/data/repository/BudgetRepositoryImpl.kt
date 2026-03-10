@@ -32,10 +32,6 @@ class BudgetRepositoryImpl @Inject constructor(
 
         val payments =
             paymentDao.getByBudgetId(id).map { it.toDomain() }
-
-        budget.expenses.addAll(expenses)
-        budget.scheduledPayments.addAll(payments)
-
         return budget
     }
 
