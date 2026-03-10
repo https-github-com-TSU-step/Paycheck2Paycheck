@@ -55,7 +55,6 @@ fun BudgetEntity.toDomain(streak: Streak): Budget =
         remainingAmount = remainingAmount,
         createdAt = createdAt,
         updatedAt = updatedAt,
-        streak = streak
     )
 fun Budget.toEntity(): BudgetEntity = BudgetEntity(
     id = id,
