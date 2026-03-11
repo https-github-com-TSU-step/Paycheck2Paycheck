@@ -10,7 +10,7 @@ interface StreakDao {
     suspend fun getByBudgetId(budgetId: String): StreakEntity?
 
     @Query("SELECT * FROM streaks LIMIT 1")
-    suspend fun getStreak(): StreakEntity?  // ← ДОБАВЬ
+    suspend fun getStreak(): StreakEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(streak: StreakEntity)
@@ -19,5 +19,5 @@ interface StreakDao {
     suspend fun update(streak: StreakEntity)
 
     @Update
-    suspend fun updateStreak(streak: StreakEntity)  // ← ДОБАВЬ (алиас для update)
+    suspend fun updateStreak(streak: StreakEntity)
 }

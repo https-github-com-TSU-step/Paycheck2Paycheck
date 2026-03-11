@@ -44,7 +44,8 @@ import com.example.paycheck2paycheck.ui.presentation.theme.Paycheck2PaycheckThem
 fun DashboardScreen(
     state: DashboardState = DashboardState(),
     onAddExpenseClick: () -> Unit = {},
-    onVoiceExpenseClick: () -> Unit = {}
+    onVoiceExpenseClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {}
 ) {
     var currentTab by remember { mutableIntStateOf(0) }
 
@@ -94,7 +95,7 @@ fun DashboardScreen(
         ) {
             MainTopBar(
                 currentDate = "24 Февраля",
-                onSettingsClick = { }
+                onSettingsClick = onSettingsClick
             )
 
             Column(

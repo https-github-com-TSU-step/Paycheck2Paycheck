@@ -1,3 +1,5 @@
+package com.example.paycheck2paycheck.domain.usecase
+
 import com.example.paycheck2paycheck.domain.repository.BudgetRepository
 import com.example.paycheck2paycheck.domain.repository.ScheduledPaymentRepository
 import java.time.LocalDateTime
