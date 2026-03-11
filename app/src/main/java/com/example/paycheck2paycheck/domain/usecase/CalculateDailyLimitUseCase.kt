@@ -1,42 +1,37 @@
-package com.example.paycheck2paycheck.domain.usecase
-
 import com.example.paycheck2paycheck.domain.repository.BudgetRepository
 import com.example.paycheck2paycheck.domain.repository.ScheduledPaymentRepository
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
+import kotlin.math.max
 
-class CalculateDailyLimitUseCase(
+class CalculateDailyLimitUseCase @Inject constructor(
     private val budgetRepository: BudgetRepository,
     private val scheduledPaymentRepository: ScheduledPaymentRepository
 ) {
-    suspend fun execute(budgetId: String): Double {
-
-        // Получение бюджета из БД
+    suspend operator fun invoke(budgetId: String): Double {
         val budget = budgetRepository.getBudgetById(budgetId)
             ?: throw Exception("Бюджет не найден")
 
-        // Получение неоплаченных будущих платежей
-        val scheduledPayments = scheduledPaymentRepository
-            .getScheduledPayments(budgetId)
-            .filter { !it.isPaid && it.date.isAfter(LocalDateTime.now()) }
+        val scheduledPayments = scheduledPaymentRepository.getByBudgetId(budgetId)
 
-        // Сумма будущих платежей
-        val futurePaymentsSum = scheduledPayments.sumOf { it.amount }
+        val daysLeft = getRemainingDays(budget.startDate, budget.endDate)
 
-        // Доступная сумма = остаток - будущие платежи
-        val availableAmount = budget.remainingAmount - futurePaymentsSum
+        val unpaidAmount = scheduledPayments
+            .filter { !it.isPaid }
+            .sumOf { it.amount }
 
-        // Оставшиеся дни до конца периода
-        val remainingDays = ChronoUnit.DAYS.between(
-            LocalDateTime.now(),
-            budget.endDate
-        ).toInt()
+        val availableFunds = budget.remainingAmount - unpaidAmount
 
-        // Дневной лимит
-        return if (remainingDays > 0) {
-            availableAmount / remainingDays
-        } else {
-            0.0
+        return if (daysLeft > 0) availableFunds / daysLeft else availableFunds
+    }
+
+    private fun getRemainingDays(startDate: LocalDateTime, endDate: LocalDateTime): Int {
+        val now = LocalDateTime.now()
+        if (now.isAfter(endDate)) return 0
+        if (now.isBefore(startDate)) {
+            return ChronoUnit.DAYS.between(startDate.toLocalDate(), endDate.toLocalDate()).toInt()
         }
+        return max(1, ChronoUnit.DAYS.between(now.toLocalDate(), endDate.toLocalDate()).toInt())
     }
 }

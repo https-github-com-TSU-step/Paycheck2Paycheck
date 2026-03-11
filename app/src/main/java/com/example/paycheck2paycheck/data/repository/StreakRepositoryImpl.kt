@@ -11,7 +11,7 @@ class StreakRepositoryImpl @Inject constructor(
     private val streakDao: StreakDao
 ) : StreakRepository {
 
-    override suspend fun getStreak(): Streak? {
+    override suspend fun getStreak(budgetId: String): Streak? {
         // Берем Entity из БД и превращаем в доменную модель через маппер
         return streakDao.getStreak()?.toDomain()
     }

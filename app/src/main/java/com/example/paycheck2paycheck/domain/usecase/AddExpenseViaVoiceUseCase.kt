@@ -1,50 +1,60 @@
 package com.example.paycheck2paycheck.domain.usecase
 
-import com.example.paycheck2paycheck.domain.model.*
-import com.example.paycheck2paycheck.domain.repository.*
+import com.example.paycheck2paycheck.domain.model.Expense
+import com.example.paycheck2paycheck.domain.model.RecordingMethod
+import com.example.paycheck2paycheck.domain.repository.BudgetRepository
+import com.example.paycheck2paycheck.domain.repository.ExpenseRepository
+import com.example.paycheck2paycheck.domain.repository.ScheduledPaymentRepository
+import com.example.paycheck2paycheck.domain.repository.VoiceRepository
+import java.io.File
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.math.max
 
-class AddExpenseManually @Inject constructor(
-    private val budgetRepository: BudgetRepository,
+class AddExpenseViaVoiceUseCase @Inject constructor(
+    private val voiceRepository: VoiceRepository,
     private val expenseRepository: ExpenseRepository,
+    private val budgetRepository: BudgetRepository,
     private val scheduledPaymentRepository: ScheduledPaymentRepository,
     private val updateStreakUseCase: UpdateStreakUseCase
 ) {
-    suspend fun execute(amount: Double, description: String, budgetId: String) {
+    suspend fun execute(audioFile: File, budgetId: String) {
+        // 1. Распознать голос
+        val result = voiceRepository.recognizeVoice(audioFile)
+
         val budget = budgetRepository.getBudgetById(budgetId)
             ?: throw Exception("Бюджет не найден")
 
+        // 2. Создать expense
         val expense = Expense(
             id = UUID.randomUUID().toString(),
-            name = description,
-            amount = amount,
+            name = result.description,
+            amount = result.amount,
             date = LocalDateTime.now(),
             budgetId = budget.id,
-            recordMethod = RecordingMethod.MANUAL,
+            recordMethod = RecordingMethod.VOICE,
             createdAt = LocalDateTime.now()
         )
 
-        // Новый remainingAmount
-        val newRemaining = budget.remainingAmount - amount
+        // 3. Обновить budget
+        val newRemaining = budget.remainingAmount - result.amount
 
-        // Расчёт нового лимита напрямую здесь
+        // 4. Пересчитать лимит
         val scheduledPayments = scheduledPaymentRepository.getByBudgetId(budgetId)
         val unpaidAmount = scheduledPayments.filter { !it.isPaid }.sumOf { it.amount }
         val daysLeft = getRemainingDays(budget.startDate, budget.endDate)
         val availableFunds = newRemaining - unpaidAmount
         val newDailyLimit = if (daysLeft > 0) availableFunds / daysLeft else availableFunds
 
-        // Обновить budget одним UPDATE
         val updatedBudget = budget.copy(
             remainingAmount = newRemaining,
             dailyLimit = newDailyLimit,
             updatedAt = LocalDateTime.now()
         )
 
+        // 5. Сохранить
         expenseRepository.addExpense(expense)
         budgetRepository.updateBudget(updatedBudget)
         updateStreakUseCase(budgetId)

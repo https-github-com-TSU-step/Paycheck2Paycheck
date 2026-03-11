@@ -11,23 +11,25 @@ class ScheduledPaymentRepositoryImpl @Inject constructor(
     private val dao: ScheduledPaymentDao
 ) : ScheduledPaymentRepository {
 
-    override suspend fun getScheduledPaymentById(id: String): ScheduledPayment? {
+    // 1. Был getScheduledPaymentById -> стал getById
+    override suspend fun getById(id: String): ScheduledPayment? {
         return dao.getById(id)?.toDomain()
     }
 
-    override suspend fun getScheduledPayments(budgetId: String): List<ScheduledPayment> {
+    // 2. Был getScheduledPayments -> стал getByBudgetId
+    override suspend fun getByBudgetId(budgetId: String): List<ScheduledPayment> {
         return dao.getByBudgetId(budgetId).map { it.toDomain() }
     }
 
-    override suspend fun addScheduledPayment(payment: ScheduledPayment) {
+    // 3. Был addScheduledPayment -> стал save (универсальный для добавления и обновления)
+    override suspend fun save(payment: ScheduledPayment) {
         dao.insert(payment.toEntity())
     }
 
-    override suspend fun markAsPaid(paymentId: String) {
-        dao.markAsPaid(paymentId)
+    // 4. Был deleteScheduledPayment -> стал delete
+    override suspend fun delete(id: String) {
+        dao.delete(id)
     }
 
-    override suspend fun deleteScheduledPayment(paymentId: String) {
-        dao.delete(paymentId)
-    }
+    // МЕТОД markAsPaid УДАЛЯЕМ — теперь это логика Use Case через метод save()
 }

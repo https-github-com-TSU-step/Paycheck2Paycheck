@@ -1,4 +1,4 @@
-package com.example.paycheck2paycheck.di
+package com.example.paycheck2paycheck.data.di
 
 import com.example.paycheck2paycheck.data.repository.*
 import com.example.paycheck2paycheck.domain.repository.*

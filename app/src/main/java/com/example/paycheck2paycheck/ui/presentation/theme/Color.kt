@@ -2,10 +2,11 @@ package com.example.paycheck2paycheck.ui.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val BackGroundColor = Color(0xFFF8FAFC)
+val TextColor = Color(0xFF1E293B)
+val TextColor2 = Color(0xFF64748B)
+val TextBtnColor = Color(0xFFFFFFFF)
+val ColorError = Color(0xFFD72225)
+val ColorBtn = Color(0xFF0B7CEE)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val ColorIconBg = Color(0xFFFFF3E0)
