@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.paycheck2paycheck.ui.presentation.screens.DashboardScreen
+import com.example.paycheck2paycheck.ui.presentation.screens.dashboard.DashboardScreen
 import com.example.paycheck2paycheck.ui.presentation.theme.Paycheck2PaycheckTheme
 
 class MainActivity : ComponentActivity() {

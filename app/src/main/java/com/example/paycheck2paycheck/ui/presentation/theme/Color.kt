@@ -8,3 +8,5 @@ val TextColor2 = Color(0xFF64748B)
 val TextBtnColor = Color(0xFFFFFFFF)
 val ColorError = Color(0xFFD72225)
 val ColorBtn = Color(0xFF0B7CEE)
+
+val ColorIconBg = Color(0xFFFFF3E0)
