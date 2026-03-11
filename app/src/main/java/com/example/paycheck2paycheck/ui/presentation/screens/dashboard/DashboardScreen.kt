@@ -90,7 +90,7 @@ fun DashboardScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background) // Цвет фона из темы
+                .background(MaterialTheme.colorScheme.background)
         ) {
             MainTopBar(
                 currentDate = "24 Февраля",

@@ -30,14 +30,14 @@ fun StatCard(
     modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = modifier.height(140.dp),
+        modifier = modifier.height(180.dp),
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(16.dp),
         shadowElevation = 2.dp
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.Top
         ) {
             Box(
                 modifier = Modifier
@@ -50,6 +50,9 @@ fun StatCard(
             ) {
                 // Тут потом будет иконка
             }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
             Column {
                 Text(
                     text = "СРЕДНИЙ НА ДЕНЬ",

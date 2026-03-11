@@ -25,7 +25,7 @@ fun StreakCard(currentStreak: Int,
                modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = modifier,
+        modifier = modifier.height(180.dp),
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(16.dp),
         shadowElevation = 2.dp
