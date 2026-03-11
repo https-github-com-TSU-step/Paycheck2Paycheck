@@ -8,8 +8,4 @@ sealed class MoneyOperation {
     abstract val amount: Double
     abstract val date: LocalDateTime
     abstract val budgetId: String
-
-    open fun markAsPaid() {
-        // Какая-то реализация
-    }
 }

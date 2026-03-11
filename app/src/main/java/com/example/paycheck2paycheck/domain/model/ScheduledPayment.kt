@@ -8,10 +8,5 @@ data class ScheduledPayment(
     override val amount: Double,
     override val date: LocalDateTime,
     override val budgetId: String,
-    var isPaid: Boolean = false
-) : MoneyOperation() {
-
-    override fun markAsPaid() {
-        isPaid = true
-    }
-}
+    val isPaid: Boolean = false // Теперь val
+) : MoneyOperation()

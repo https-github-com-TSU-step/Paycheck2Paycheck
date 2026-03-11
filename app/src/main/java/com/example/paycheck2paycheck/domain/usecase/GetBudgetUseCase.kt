@@ -2,12 +2,13 @@ package com.example.paycheck2paycheck.domain.usecase
 
 import com.example.paycheck2paycheck.domain.model.Budget
 import com.example.paycheck2paycheck.domain.repository.BudgetRepository
+import javax.inject.Inject
 
-class GetBudgetUseCase(
-        private val budgetRepository: BudgetRepository
+class GetBudgetUseCase @Inject constructor(  // ← ДОБАВЬ @Inject
+    private val budgetRepository: BudgetRepository
 ) {
-    suspend fun execute(budgetId: String): Budget {
+    suspend operator fun invoke(budgetId: String): Budget {  // ← operator для вызова через ()
         return budgetRepository.getBudgetById(budgetId)
-                ?: throw Exception("Бюджет не найден")
+            ?: throw Exception("Бюджет не найден")
     }
 }
