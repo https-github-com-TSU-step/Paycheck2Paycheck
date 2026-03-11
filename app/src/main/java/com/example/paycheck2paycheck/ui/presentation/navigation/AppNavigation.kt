@@ -1,42 +1,53 @@
 package com.example.paycheck2paycheck.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.paycheck2paycheck.ui.presentation.screens.budget.BudgetSetupScreen
 import com.example.paycheck2paycheck.ui.presentation.screens.dashboard.DashboardScreen
+import com.example.paycheck2paycheck.ui.presentation.screens.dashboard.DashboardViewModel
 
 @Composable
 fun AppNavigation() {
-    // NavController - это "руль" нашего приложения
     val navController = rememberNavController()
 
-    // NavHost - это карта экранов. startDestination указывает, что показывать первым
     NavHost(navController = navController, startDestination = "dashboard") {
 
-        // 1. Главный экран
-        composable("dashboard") {
-            DashboardScreen(
-                // Передаем колбэк для клика по шестеренке
-                onSettingsClick = {
-                    navController.navigate("setup")
+        composable("dashboard") { backStackEntry ->
+            val viewModel: DashboardViewModel = hiltViewModel()
+            val state by viewModel.state.collectAsState()
+
+            // Перезагружаем данные когда возвращаемся с экрана настройки
+            val savedStateHandle = backStackEntry.savedStateHandle
+            val shouldReload by savedStateHandle.getStateFlow("reload", false).collectAsState()
+            LaunchedEffect(shouldReload) {
+                if (shouldReload) {
+                    viewModel.loadBudget()
+                    savedStateHandle["reload"] = false
                 }
-                // (Не забудь добавить onSettingsClick внутрь твоего DashboardScreen и прокинуть его в MainTopBar)
+            }
+
+            DashboardScreen(
+                state = state,
+                onSettingsClick = { navController.navigate("setup") }
             )
         }
 
-        // 2. Экран настройки бюджета
         composable("setup") {
             BudgetSetupScreen(
-                // Возврат по стрелочке
                 onBackClick = {
                     navController.popBackStack()
                 },
-                // Сохранение бюджета
-                onSaveClick = { amount, startDate, endDate ->
-                    // Вызываем логику сохранения во ViewModel (которую ты уже написал),
-                    // а затем возвращаемся назад
+                onSaveClick = { _, _, _ ->
+                    // Сигнализируем Dashboard перезагрузить данные
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("reload", true)
                     navController.popBackStack()
                 }
             )

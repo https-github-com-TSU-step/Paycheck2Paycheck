@@ -53,7 +53,10 @@ fun BudgetSetupScreen(
         onStartDateClick = { showStartDatePicker = true },
         onEndDateClick = { showEndDatePicker = true },
         onBackClick = onBackClick,
-        onSaveClick = { onSaveClick(uiState.amount, uiState.startDate, uiState.endDate) }
+        onSaveClick = {
+            viewModel.saveBudget()
+            onSaveClick(uiState.amount, uiState.startDate, uiState.endDate)
+        }
     )
 
     if (showStartDatePicker) {

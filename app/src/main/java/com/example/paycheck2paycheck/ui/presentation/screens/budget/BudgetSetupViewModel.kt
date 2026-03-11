@@ -1,11 +1,14 @@
 package com.example.paycheck2paycheck.ui.presentation.screens.budget
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.paycheck2paycheck.domain.usecase.CreateBudgetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -13,7 +16,9 @@ import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class BudgetSetupViewModel @Inject constructor() : ViewModel() {
+class BudgetSetupViewModel @Inject constructor(
+    private val createBudgetUseCase: CreateBudgetUseCase
+) : ViewModel() {
 
     private val dateFormatter = DateTimeFormatter.ofPattern("d MMM, yyyy", Locale("ru"))
 
@@ -87,6 +92,20 @@ class BudgetSetupViewModel @Inject constructor() : ViewModel() {
             return "Ошибка в значении срока, дата окончания не может быть равна или меньше даты начала"
         }
         return null
+    }
+
+    fun saveBudget() {
+        val amount = _uiState.value.amount
+            .replace(" ", "")
+            .replace(",", ".")
+            .toDoubleOrNull() ?: return
+        viewModelScope.launch {
+            createBudgetUseCase(
+                amount = amount,
+                startDate = startLocalDate.atStartOfDay(),
+                endDate = endLocalDate.atStartOfDay()
+            )
+        }
     }
 
     private fun formatAmount(amount: Double): String = String.format("%.0f", amount)
