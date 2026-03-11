@@ -17,11 +17,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CurrencyRuble
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -36,7 +36,7 @@ fun AmountInputSection(
     modifier: Modifier = Modifier
 ) {
     val isNegative = amount.startsWith("-")
-    val textColor = if (isNegative) Color.Red else Color.Black
+    val textColor = if (isNegative) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -44,21 +44,19 @@ fun AmountInputSection(
     ) {
         Text(
             text = "СУММА",
-            fontSize = 12.sp,
-            color = Color.Gray,
-            fontWeight = FontWeight.Medium
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Балансировочный Spacer
             Spacer(modifier = Modifier.width(44.dp))
-            
+
             BasicTextField(
                 value = amount,
                 onValueChange = onAmountChange,
@@ -78,7 +76,7 @@ fun AmountInputSection(
                                 text = "0",
                                 fontSize = 48.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.LightGray,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -86,29 +84,31 @@ fun AmountInputSection(
                     }
                 }
             )
-            
+
             Icon(
                 imageVector = Icons.Default.CurrencyRuble,
                 contentDescription = null,
                 modifier = Modifier
                     .size(44.dp)
                     .padding(start = 12.dp),
-                tint = Color.LightGray
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             )
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Box(
             modifier = Modifier
-                .background(Color(0xFFE0F2FE), shape = RoundedCornerShape(16.dp))
+                .background(
+                    MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(16.dp)
+                )
                 .padding(horizontal = 16.dp, vertical = 6.dp)
         ) {
             Text(
                 text = "Доступно на месяц",
-                fontSize = 12.sp,
-                color = Color(0xFF3B82F6),
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
