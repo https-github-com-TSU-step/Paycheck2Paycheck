@@ -2,34 +2,44 @@ package com.example.paycheck2paycheck.domain.usecase
 
 import com.example.paycheck2paycheck.domain.repository.BudgetRepository
 import com.example.paycheck2paycheck.domain.repository.ScheduledPaymentRepository
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
+import kotlin.math.max
 
 class MarkPaymentAsPaidUseCase @Inject constructor(
     private val paymentRepository: ScheduledPaymentRepository,
-    private val budgetRepository: BudgetRepository,
-    private val calculateLimit: CalculateDailyLimitUseCase
+    private val budgetRepository: BudgetRepository
 ) {
     suspend fun execute(paymentId: String) {
-        // 1. Получаем сам платеж
         val payment = paymentRepository.getById(paymentId) ?: return
 
-        // 2. Обновляем статус платежа в базе
+        // Обновляем статус
         val updatedPayment = payment.copy(isPaid = true)
         paymentRepository.save(updatedPayment)
 
-        // 3. Получаем актуальный бюджет
+        // Получаем бюджет
         val budget = budgetRepository.getBudgetById(payment.budgetId) ?: return
 
-        // 4. Получаем ВСЕ платежи этого бюджета, чтобы расчет лимита был точным
-        // (ведь один стал оплаченным, значит "замороженных" денег стало меньше)
+        // Пересчитываем лимит напрямую
         val allPayments = paymentRepository.getByBudgetId(budget.id)
+        val unpaidAmount = allPayments.filter { !it.isPaid }.sumOf { it.amount }
+        val daysLeft = getRemainingDays(budget.startDate, budget.endDate)
+        val availableFunds = budget.remainingAmount - unpaidAmount
+        val newDailyLimit = if (daysLeft > 0) availableFunds / daysLeft else availableFunds
 
-        // 5. Вызываем наш математический Use Case (вот он, расчет лимита)
-        val newDailyLimit = calculateLimit(budget, allPayments)
-
-        // 6. Сохраняем обновленный бюджет с новым лимитом
+        // Обновляем бюджет
         budgetRepository.updateBudget(
             budget.copy(dailyLimit = newDailyLimit)
         )
+    }
+
+    private fun getRemainingDays(startDate: LocalDateTime, endDate: LocalDateTime): Int {
+        val now = LocalDateTime.now()
+        if (now.isAfter(endDate)) return 0
+        if (now.isBefore(startDate)) {
+            return ChronoUnit.DAYS.between(startDate.toLocalDate(), endDate.toLocalDate()).toInt()
+        }
+        return max(1, ChronoUnit.DAYS.between(now.toLocalDate(), endDate.toLocalDate()).toInt())
     }
 }
