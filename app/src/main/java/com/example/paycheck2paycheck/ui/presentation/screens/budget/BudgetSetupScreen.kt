@@ -8,71 +8,101 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.paycheck2paycheck.ui.presentation.components.AmountInputSection
 import com.example.paycheck2paycheck.ui.presentation.components.CalculationInfoBanner
 import com.example.paycheck2paycheck.ui.presentation.components.DatePickerField
 import com.example.paycheck2paycheck.ui.presentation.components.PrimaryButton
 import com.example.paycheck2paycheck.ui.presentation.components.SetupTopBar
 import com.example.paycheck2paycheck.ui.presentation.theme.Paycheck2PaycheckTheme
+import java.time.Instant
+import java.time.ZoneId
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BudgetSetupScreen(
     onBackClick: () -> Unit,
-    onSaveClick: (amount: String, startDate: String, endDate: String) -> Unit
+    onSaveClick: (amount: String, startDate: String, endDate: String) -> Unit,
+    viewModel: BudgetSetupViewModel = hiltViewModel()
 ) {
-    // В реальном приложении это состояние будет в ViewModel
-    var amount by remember { mutableStateOf("50 000") }
-    var startDate by remember { mutableStateOf("21 Фев, 2026") }
-    var endDate by remember { mutableStateOf("2 Мар, 2026") }
-    
-    // Простая логика для демонстрации состояний
-    val isNegative = amount.contains("-")
-    val amountError = if (isNegative) "Ошибка в значении суммы, для расчета введите правильную сумму" else null
-    
-    // Временная заглушка для ошибки даты (для демонстрации в превью)
-    val isDateError = startDate == "2 Мар, 2026" && endDate == "21 Фев, 2026"
-    val dateError = if (isDateError) "Ошибка в значении срока, дата окончания не может быть равна или меньше даты начала" else null
+    val uiState by viewModel.uiState.collectAsState()
 
-    val days = if (isDateError) 0 else 7
-    val dailyAmount = try {
-        val cleanAmount = amount.replace(" ", "").replace("₽", "")
-        if (cleanAmount.isEmpty() || isNegative) "0" 
-        else (cleanAmount.toLong() / 7).toString()
-    } catch (e: Exception) {
-        "0"
-    }
-
-    val uiState = BudgetSetupUiState(
-        amount = amount,
-        startDate = startDate,
-        endDate = endDate,
-        days = days,
-        dailyAmount = dailyAmount,
-        amountError = amountError,
-        dateError = dateError
-    )
+    var showStartDatePicker by remember { mutableStateOf(false) }
+    var showEndDatePicker by remember { mutableStateOf(false) }
 
     BudgetSetupContent(
         uiState = uiState,
-        onAmountChange = { amount = it },
-        onStartDateClick = { /* */ },
-        onEndDateClick = { /* */ },
+        onAmountChange = viewModel::onAmountChanged,
+        onStartDateClick = { showStartDatePicker = true },
+        onEndDateClick = { showEndDatePicker = true },
         onBackClick = onBackClick,
         onSaveClick = { onSaveClick(uiState.amount, uiState.startDate, uiState.endDate) }
     )
+
+    if (showStartDatePicker) {
+        BudgetDatePickerDialog(
+            onDismiss = { showStartDatePicker = false },
+            onConfirm = { millis ->
+                val date = Instant.ofEpochMilli(millis)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                viewModel.onStartDateChanged(date)
+                showStartDatePicker = false
+            }
+        )
+    }
+
+    if (showEndDatePicker) {
+        BudgetDatePickerDialog(
+            onDismiss = { showEndDatePicker = false },
+            onConfirm = { millis ->
+                val date = Instant.ofEpochMilli(millis)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                viewModel.onEndDateChanged(date)
+                showEndDatePicker = false
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BudgetDatePickerDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (Long) -> Unit
+) {
+    val datePickerState = rememberDatePickerState()
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                datePickerState.selectedDateMillis?.let { onConfirm(it) }
+            }) { Text("OK") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Отмена") }
+        }
+    ) {
+        DatePicker(state = datePickerState)
+    }
 }
 
 @Composable
@@ -97,7 +127,7 @@ fun BudgetSetupContent(
                 enabled = uiState.isSaveEnabled
             )
         },
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         modifier = modifier
     ) { paddingValues ->
         Column(
@@ -107,23 +137,22 @@ fun BudgetSetupContent(
                 .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(32.dp))
-            
+
             AmountInputSection(
                 amount = uiState.amount,
                 onAmountChange = onAmountChange
             )
-            
+
             Spacer(modifier = Modifier.height(48.dp))
-            
+
             Text(
                 text = "Срок",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             Row(modifier = Modifier.fillMaxWidth()) {
                 DatePickerField(
                     label = "Дата начала",
@@ -131,9 +160,9 @@ fun BudgetSetupContent(
                     onClick = onStartDateClick,
                     modifier = Modifier.weight(1f)
                 )
-                
+
                 Spacer(modifier = Modifier.width(16.dp))
-                
+
                 DatePickerField(
                     label = "Дата окончания",
                     date = uiState.endDate,
@@ -141,9 +170,9 @@ fun BudgetSetupContent(
                     modifier = Modifier.weight(1f)
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(32.dp))
-            
+
             CalculationInfoBanner(
                 days = uiState.days,
                 dailyAmount = uiState.dailyAmount,

@@ -15,11 +15,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,16 +34,20 @@ fun DatePickerField(
     Column(modifier = modifier) {
         Text(
             text = label,
-            fontSize = 12.sp,
-            color = Color.Gray,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
         )
-        
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
-                .border(1.dp, Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.outlineVariant,
+                    RoundedCornerShape(12.dp)
+                )
                 .clickable(onClick = onClick)
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.CenterStart
@@ -53,13 +57,17 @@ fun DatePickerField(
                     imageVector = Icons.Default.DateRange,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
-                    tint = Color.Gray
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = date.ifEmpty { "Выберите дату" },
                     fontSize = 14.sp,
-                    color = if (date.isEmpty()) Color.LightGray else Color.Black,
+                    color = if (date.isEmpty()) {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    } else {
+                        MaterialTheme.colorScheme.onBackground
+                    },
                     fontWeight = if (date.isEmpty()) FontWeight.Normal else FontWeight.Medium
                 )
             }
