@@ -1,7 +1,7 @@
 package com.example.paycheck2paycheck.ui.presentation.components
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,7 +51,7 @@ fun BottomMenu(
         NavigationBarItem(
             icon = {
                 Icon(
-                    imageVector = Icons.Default.Home,
+                    imageVector = Icons.Default.History,
                     contentDescription = "История"
                 )
             },
