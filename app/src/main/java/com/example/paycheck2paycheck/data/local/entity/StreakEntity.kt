@@ -11,5 +11,5 @@ data class StreakEntity(
     val currentStreak: Int,
     val longestStreak: Int,        // В домене у тебя 'longestStreak', в первой версии Entity было 'maxStreak'
     val lastRecordedDate: LocalDateTime?, // Делаем nullable, так как в домене он может быть null
-    val totalDaysTracked: Int      // Добавлено
+    val totalDaysTracked: Int
 )
