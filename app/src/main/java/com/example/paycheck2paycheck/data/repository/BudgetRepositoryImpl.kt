@@ -28,11 +28,13 @@ class BudgetRepositoryImpl @Inject constructor(
 
         val budget = budgetEntity.toDomain(streak)
 
-        val expenses =
-            expenseDao.getExpensesForBudget(id).first().map { it.toDomain() }
+        val expenses = expenseDao.getExpensesByBudgetId(id).map { entity: com.example.paycheck2paycheck.data.local.entity.ExpenseEntity ->
+            entity.toDomain()
+        }
 
-        val payments =
-            paymentDao.getByBudgetId(id).map { it.toDomain() }
+        val payments = paymentDao.getByBudgetId(id).map { entity: com.example.paycheck2paycheck.data.local.entity.ScheduledPaymentEntity ->
+            entity.toDomain()
+        }
         return budget
     }
 
