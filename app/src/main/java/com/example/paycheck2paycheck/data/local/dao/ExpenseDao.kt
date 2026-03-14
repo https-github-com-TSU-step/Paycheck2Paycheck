@@ -11,8 +11,7 @@ interface ExpenseDao {
     suspend fun getExpenseById(id: String): ExpenseEntity?
 
     @Query("SELECT * FROM expenses WHERE budgetId = :budgetId ORDER BY date DESC")
-    fun getExpensesForBudget(budgetId: String): Flow<List<ExpenseEntity>>
-
+    suspend fun getExpensesByBudgetId(budgetId: String): List<ExpenseEntity>
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(expense: ExpenseEntity)
 
