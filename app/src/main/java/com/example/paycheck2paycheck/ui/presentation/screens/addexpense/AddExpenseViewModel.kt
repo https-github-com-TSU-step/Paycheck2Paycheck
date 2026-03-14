@@ -2,7 +2,9 @@ package com.example.paycheck2paycheck.ui.presentation.screens.addexpense
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.paycheck2paycheck.domain.model.ScheduledPayment
 import com.example.paycheck2paycheck.domain.repository.BudgetRepository
+import com.example.paycheck2paycheck.domain.repository.ScheduledPaymentRepository
 import com.example.paycheck2paycheck.domain.usecase.AddExpenseManually
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,19 +12,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class AddExpenseViewModel @Inject constructor(
     private val addExpenseManually: AddExpenseManually,
+    private val scheduledPaymentRepository: ScheduledPaymentRepository, // ← добавили
     private val budgetRepository: BudgetRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddExpenseState())
     val state: StateFlow<AddExpenseState> = _state.asStateFlow()
+
+    private val dateFormatter = DateTimeFormatter.ofPattern("d MMM, yyyy", Locale("ru"))
 
     init {
         updateCurrentDateTime()
@@ -45,19 +52,24 @@ class AddExpenseViewModel @Inject constructor(
 
     fun onScheduledToggled(isScheduled: Boolean) {
         _state.update {
+            val tomorrow = LocalDate.now().plusDays(1)
             it.copy(
                 isScheduled = isScheduled,
-                scheduledDate = if (isScheduled && it.scheduledDate.isEmpty()) {
-                    formatDate(LocalDateTime.now().plusDays(1))
-                } else {
-                    it.scheduledDate
-                }
+                scheduledDate = if (isScheduled && it.scheduledDate == null) tomorrow else it.scheduledDate,
+                scheduledDateFormatted = if (isScheduled && it.scheduledDate == null) {
+                    tomorrow.format(dateFormatter)
+                } else it.scheduledDateFormatted
             )
         }
     }
 
-    fun onDateSelected(date: String) {
-        _state.update { it.copy(scheduledDate = date) }
+    fun onDateSelected(date: LocalDate) {
+        _state.update {
+            it.copy(
+                scheduledDate = date,
+                scheduledDateFormatted = date.format(dateFormatter)
+            )
+        }
     }
 
     fun addExpense() {
@@ -68,9 +80,7 @@ class AddExpenseViewModel @Inject constructor(
                 val amount = _state.value.amount.toDoubleOrNull()
                     ?: throw Exception("Введите корректную сумму")
 
-                if (amount <= 0) {
-                    throw Exception("Сумма должна быть больше 0")
-                }
+                if (amount <= 0) throw Exception("Сумма должна быть больше 0")
 
                 val description = _state.value.description.ifBlank {
                     throw Exception("Введите описание")
@@ -79,21 +89,26 @@ class AddExpenseViewModel @Inject constructor(
                 val budget = budgetRepository.getLatestBudget()
                     ?: throw Exception("Бюджет не найден. Создайте бюджет в настройках.")
 
-                addExpenseManually.execute(amount, description, budget.id)
+                if (_state.value.isScheduled) {
+                    val scheduledDate = _state.value.scheduledDate
+                        ?: throw Exception("Выберите дату запланированного платежа")
 
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        isSuccess = true
+                    val payment = ScheduledPayment(
+                        id = UUID.randomUUID().toString(),
+                        name = description,
+                        amount = amount,
+                        date = scheduledDate.atStartOfDay(), // можно .atTime(10, 0) если нужно время
+                        budgetId = budget.id,
+                        isPaid = false
                     )
+                    scheduledPaymentRepository.save(payment)
+                } else {
+                    addExpenseManually.execute(amount, description, budget.id)
                 }
+
+                _state.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message
-                    )
-                }
+                _state.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
@@ -104,7 +119,6 @@ class AddExpenseViewModel @Inject constructor(
     }
 
     private fun formatDate(date: LocalDateTime): String {
-        val formatter = DateTimeFormatter.ofPattern("d MMM, yyyy", Locale("ru"))
-        return date.format(formatter)
+        return date.format(DateTimeFormatter.ofPattern("d MMM, yyyy", Locale("ru")))
     }
 }

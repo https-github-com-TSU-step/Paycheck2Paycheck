@@ -1,6 +1,7 @@
 package com.example.paycheck2paycheck.ui.presentation.screens.addexpense
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -20,6 +21,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,18 +34,17 @@ fun AddExpenseBottomSheet(
     val state by viewModel.state.collectAsState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    // ИСПРАВЛЕННАЯ ЛОГИКА ЗАКРЫТИЯ
     LaunchedEffect(state.isSuccess) {
         if (state.isSuccess) {
-            sheetState.hide() // 1. Плавно прячем шторку
-            viewModel.reset() // 2. Зачищаем старые цифры и сбрасываем isSuccess = false
-            onDismiss()       // 3. Сообщаем экрану Dashboard, что мы закрылись
+            sheetState.hide()
+            viewModel.reset()
+            onDismiss()
         }
     }
 
     ModalBottomSheet(
         onDismissRequest = {
-            viewModel.reset() // Очищаем данные, если пользователь смахнул шторку руками
+            viewModel.reset()
             onDismiss()
         },
         sheetState = sheetState,
@@ -59,15 +62,46 @@ fun AddExpenseBottomSheet(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddExpenseContent(
     state: AddExpenseState,
     onAmountChanged: (String) -> Unit = {},
     onDescriptionChanged: (String) -> Unit = {},
     onScheduledToggled: (Boolean) -> Unit = {},
-    onDateSelected: (String) -> Unit = {},
+    onDateSelected: (LocalDate) -> Unit = {},
     onAddExpense: () -> Unit = {}
 ) {
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState()
+
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val selectedDate = Instant.ofEpochMilli(millis)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+                        onDateSelected(selectedDate)
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("Подтвердить")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Отмена")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
     val amount = state.amount.toDoubleOrNull() ?: 0.0
     val isAmountValid = amount > 0
     val amountColor = if (isAmountValid || state.amount.isEmpty()) {
@@ -239,6 +273,7 @@ private fun AddExpenseContent(
                         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                         shape = RoundedCornerShape(12.dp)
                     )
+                    .clickable { showDatePicker = true }
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -249,30 +284,13 @@ private fun AddExpenseContent(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                BasicTextField(
-                    value = state.scheduledDate,
-                    onValueChange = onDateSelected,
-                    textStyle = TextStyle(
-                        fontSize = 16.sp,
-                        color = if (state.scheduledDate.isEmpty())
-                            MaterialTheme.colorScheme.error
-                        else
-                            MaterialTheme.colorScheme.onSurface
-                    ),
-                    singleLine = true,
-                    decorationBox = { innerTextField ->
-                        Box {
-                            if (state.scheduledDate.isEmpty()) {
-                                Text(
-                                    "19 Фев, 2025",
-                                    fontSize = 16.sp,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                            innerTextField()
-                        }
-                    },
-                    modifier = Modifier.weight(1f)
+                Text(
+                    text = state.scheduledDateFormatted.ifEmpty { "Выберите дату" },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (state.scheduledDateFormatted.isEmpty())
+                        MaterialTheme.colorScheme.error
+                    else
+                        MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -319,5 +337,3 @@ private fun AddExpenseContent(
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
-
-// ... твои функции Preview ...
