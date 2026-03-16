@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.remote.creation.first
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -32,6 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.paycheck2paycheck.domain.model.Expense
+import com.example.paycheck2paycheck.domain.model.RecordingMethod
 import com.example.paycheck2paycheck.ui.presentation.components.BottomMenu
 import com.example.paycheck2paycheck.ui.presentation.components.DailyBudget
 import com.example.paycheck2paycheck.ui.presentation.components.MainTopBar
@@ -39,6 +42,7 @@ import com.example.paycheck2paycheck.ui.presentation.components.StatCard
 import com.example.paycheck2paycheck.ui.presentation.components.StreakCard
 import com.example.paycheck2paycheck.ui.presentation.components.TransactionItem
 import com.example.paycheck2paycheck.ui.presentation.theme.Paycheck2PaycheckTheme
+import java.time.LocalDateTime
 
 @Composable
 fun DashboardScreen(
@@ -166,11 +170,20 @@ fun DashboardScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(state.recentTransactions.size) { index ->
-                            val tx = state.recentTransactions[index]
+                            val expense = state.recentTransactions[index] // Теперь это объект Expense
+
+                            val formattedTime = remember(expense.date) {
+                                expense.date.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+                            }
+
+                            val formattedAmount = remember(expense.amount) {
+                                "%.2f ₽".format(expense.amount).replace(".", ",")
+                            }
+
                             TransactionItem(
-                                name = tx.first,
-                                time = "Сегодня", // Хардкод
-                                amount = tx.second
+                                name = expense.name,        // Было .first
+                                time = formattedTime,       // Был хардкод "Сегодня"
+                                amount = "- $formattedAmount" // Было .second
                             )
                         }
                     }
@@ -183,19 +196,45 @@ fun DashboardScreen(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun DashboardScreenPreview() {
+    // Создаем список моковых расходов
+    val mockExpenses = listOf(
+        Expense(
+            id = "1",
+            name = "Кофе",
+            amount = 250.0,
+            date = LocalDateTime.now(),
+            budgetId = "b1",
+            recordMethod = RecordingMethod.MANUAL,
+            createdAt = LocalDateTime.now()
+        ),
+        Expense(
+            id = "2",
+            name = "Продукты",
+            amount = 1200.0,
+            date = LocalDateTime.now().minusHours(2),
+            budgetId = "b1",
+            recordMethod = RecordingMethod.VOICE,
+            createdAt = LocalDateTime.now()
+        ),
+        Expense(
+            id = "3",
+            name = "Такси",
+            amount = 430.0,
+            date = LocalDateTime.now().minusDays(1),
+            budgetId = "b1",
+            recordMethod = RecordingMethod.MANUAL,
+            createdAt = LocalDateTime.now()
+        )
+    )
 
     val previewState = DashboardState(
-        dailyBudget = "1500",
-        remainingAmount = "900",
-        spentToday = "600",
-        averageDaily = "750",
+        dailyBudget = "1500,00 ₽",
+        remainingAmount = "900,00 ₽",
+        spentToday = "600,00 ₽",
+        averageDaily = "750,00 ₽",
         currentStreak = 5,
         bestStreak = 12,
-        recentTransactions = listOf(
-            "Кофе" to "250",
-            "Продукты" to "1200",
-            "Такси" to "430"
-        )
+        recentTransactions = mockExpenses // Теперь типы совпадают
     )
 
     Paycheck2PaycheckTheme {
