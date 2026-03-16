@@ -1,4 +1,4 @@
-package com.example.paycheck2paycheck.data.di
+package com.example.paycheck2paycheck.di
 
 import com.example.paycheck2paycheck.data.remote.MockVoiceRecognitionApi
 import com.example.paycheck2paycheck.data.remote.VoiceRecognitionApi
