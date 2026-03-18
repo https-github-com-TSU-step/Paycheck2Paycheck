@@ -15,8 +15,8 @@ class ExpenseRepositoryImpl @Inject constructor(
         return expenseDao.getExpenseById(id)?.toDomain()
     }
 
-    override suspend fun getExpensesByBudgetId(id: String): List<Expense> {
-        val entities = expenseDao.getExpensesByBudgetId(id)
+    override suspend fun getExpensesByBudgetId(budgetId: String): List<Expense> {
+        val entities = expenseDao.getExpensesByBudgetId(budgetId)
         return entities.map { it.toDomain() }
     }
 
