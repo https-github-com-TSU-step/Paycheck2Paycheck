@@ -7,10 +7,12 @@ import com.example.paycheck2paycheck.domain.repository.ExpenseRepository
 import com.example.paycheck2paycheck.domain.repository.StreakRepository
 import com.example.paycheck2paycheck.domain.usecase.CalculateDailyLimitUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -33,17 +35,18 @@ class DashboardViewModel @Inject constructor(
 
     fun loadBudget() {
         viewModelScope.launch {
+            val currentDate = formatCurrentDate()
             val budget = budgetRepository.getLatestBudget()
 
             if (budget != null) {
-                val dailyLimit = calculateDailyLimitUseCase(budget.id)
+                val dailyLimit = calculateDailyLimitUseCase(budget)
                 val streak = streakRepository.getStreak(budget.id)
 
-                // 1. Загружаем список трат
-                val expenses = expenseRepository.getExpensesByBudgetId(budget.id)
-                    .sortedByDescending { it.date } // Самые свежие сверху
+                val expensesList = expenseRepository.getExpensesByBudgetId(budget.id)
+                    .firstOrNull() ?: emptyList()
 
-                // 2. Считаем, сколько потрачено конкретно сегодня
+                val expenses = expensesList.sortedByDescending { it.date }
+
                 val today = java.time.LocalDate.now()
                 val spentToday = expenses
                     .filter { it.date.toLocalDate() == today }
@@ -51,22 +54,21 @@ class DashboardViewModel @Inject constructor(
 
                 _state.update {
                     it.copy(
+                        currentDate = currentDate,
                         dailyBudget = formatMoney(dailyLimit),
                         remainingAmount = formatMoney(budget.remainingAmount),
                         spentToday = formatMoney(spentToday),
                         averageDaily = formatMoney(dailyLimit),
                         currentStreak = streak?.currentStreak ?: 0,
                         bestStreak = streak?.longestStreak ?: 0,
-                        recentTransactions = expenses // Передаем список в стейт
+                        recentTransactions = expenses.take(5)
                     )
                 }
+            } else {
+                _state.update { DashboardState(currentDate = currentDate) }
             }
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = DashboardState(isLoading = true) // Экран сразу знает, что нужно подождать
-        )
+    }
 
     private fun formatCurrentDate(): String {
         val now = LocalDateTime.now()

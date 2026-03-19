@@ -1,6 +1,12 @@
 package com.example.paycheck2paycheck.ui.presentation.navigation
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,7 +40,8 @@ fun AppNavigation() {
             DashboardScreen(
                 state = state,
                 onAddExpenseClick = { showAddExpenseSheet = true },
-                onSettingsClick = { navController.navigate("setup") }
+                onSettingsClick = { navController.navigate("setup") },
+                onHistoryClick = { navController.navigate("history") }
             )
 
             if (showAddExpenseSheet) {

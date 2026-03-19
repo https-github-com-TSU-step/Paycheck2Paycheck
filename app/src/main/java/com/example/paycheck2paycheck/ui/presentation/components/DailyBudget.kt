@@ -70,10 +70,18 @@ fun DailyBudget(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+
+                val budget = dailyBudget.replace(Regex("[^0-9,]"), "").replace(",", ".").toDoubleOrNull() ?: 0.0
+                val spent = spentToday.replace(Regex("[^0-9,]"), "").replace(",", ".").toDoubleOrNull() ?: 0.0
+                val isOverBudget = spent > budget
+
                 Text(
                     text = spentToday,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = if (isOverBudget)
+                        MaterialTheme.colorScheme.error
+                    else
+                        MaterialTheme.colorScheme.onBackground
                 )
             }
         }
