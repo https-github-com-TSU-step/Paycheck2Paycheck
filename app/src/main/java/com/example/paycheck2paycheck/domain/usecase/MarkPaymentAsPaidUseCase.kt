@@ -2,6 +2,7 @@ package com.example.paycheck2paycheck.domain.usecase
 
 import com.example.paycheck2paycheck.domain.repository.BudgetRepository
 import com.example.paycheck2paycheck.domain.repository.ScheduledPaymentRepository
+import kotlinx.coroutines.flow.first
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
@@ -22,7 +23,7 @@ class MarkPaymentAsPaidUseCase @Inject constructor(
         val budget = budgetRepository.getBudgetById(payment.budgetId) ?: return
 
         // Пересчитываем лимит напрямую
-        val allPayments = paymentRepository.getByBudgetId(budget.id)
+        val allPayments = paymentRepository.getByBudgetId(budget.id).first()
         val unpaidAmount = allPayments.filter { !it.isPaid }.sumOf { it.amount }
         val daysLeft = getRemainingDays(budget.startDate, budget.endDate)
         val availableFunds = budget.remainingAmount - unpaidAmount

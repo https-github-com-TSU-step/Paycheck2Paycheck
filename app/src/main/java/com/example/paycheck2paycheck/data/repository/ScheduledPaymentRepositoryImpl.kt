@@ -5,6 +5,8 @@ import com.example.paycheck2paycheck.data.mapper.toDomain
 import com.example.paycheck2paycheck.data.mapper.toEntity
 import com.example.paycheck2paycheck.domain.model.ScheduledPayment
 import com.example.paycheck2paycheck.domain.repository.ScheduledPaymentRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class ScheduledPaymentRepositoryImpl @Inject constructor(
@@ -17,11 +19,12 @@ class ScheduledPaymentRepositoryImpl @Inject constructor(
     }
 
     // 2. Был getScheduledPayments -> стал getByBudgetId
-    override suspend fun getByBudgetId(budgetId: String): List<ScheduledPayment> {
-        return dao.getByBudgetId(budgetId).map { it.toDomain() }
+    override fun getByBudgetId(budgetId: String): Flow<List<ScheduledPayment>> {
+        return dao.getByBudgetId(budgetId).map { entities ->
+            entities.map { it.toDomain() }
+        }
     }
 
-    // 3. Был addScheduledPayment -> стал save (универсальный для добавления и обновления)
     override suspend fun save(payment: ScheduledPayment) {
         dao.insert(payment.toEntity())
     }

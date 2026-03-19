@@ -1,9 +1,9 @@
 package com.example.paycheck2paycheck.data.remote
 
 import com.example.paycheck2paycheck.data.remote.dto.VoiceRecognitionResponse
+import kotlinx.coroutines.delay
 import java.io.File
 import javax.inject.Inject
-import kotlinx.coroutines.delay
 
 class MockVoiceRecognitionApi @Inject constructor() : VoiceRecognitionApi {
 

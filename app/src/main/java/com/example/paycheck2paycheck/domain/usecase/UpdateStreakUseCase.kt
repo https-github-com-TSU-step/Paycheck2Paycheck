@@ -1,6 +1,5 @@
 package com.example.paycheck2paycheck.domain.usecase
 
-import com.example.paycheck2paycheck.domain.model.Streak
 import com.example.paycheck2paycheck.domain.repository.StreakRepository
 import java.time.LocalDateTime
 import javax.inject.Inject

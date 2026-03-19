@@ -6,6 +6,7 @@ import com.example.paycheck2paycheck.domain.repository.BudgetRepository
 import com.example.paycheck2paycheck.domain.repository.ExpenseRepository
 import com.example.paycheck2paycheck.domain.repository.ScheduledPaymentRepository
 import com.example.paycheck2paycheck.domain.repository.VoiceRepository
+import kotlinx.coroutines.flow.first
 import java.io.File
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -42,7 +43,7 @@ class AddExpenseViaVoiceUseCase @Inject constructor(
         val newRemaining = budget.remainingAmount - result.amount
 
         // 4. Пересчитать лимит
-        val scheduledPayments = scheduledPaymentRepository.getByBudgetId(budgetId)
+        val scheduledPayments = scheduledPaymentRepository.getByBudgetId(budgetId).first()
         val unpaidAmount = scheduledPayments.filter { !it.isPaid }.sumOf { it.amount }
         val daysLeft = getRemainingDays(budget.startDate, budget.endDate)
         val availableFunds = newRemaining - unpaidAmount

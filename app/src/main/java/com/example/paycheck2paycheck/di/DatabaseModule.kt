@@ -3,7 +3,11 @@ package com.example.paycheck2paycheck.di
 import android.content.Context
 import androidx.room.Room
 import com.example.paycheck2paycheck.data.local.AppDatabase
-import com.example.paycheck2paycheck.data.local.dao.*
+import com.example.paycheck2paycheck.data.local.dao.BudgetDao
+import com.example.paycheck2paycheck.data.local.dao.ExpenseDao
+import com.example.paycheck2paycheck.data.local.dao.PendingAudioDao
+import com.example.paycheck2paycheck.data.local.dao.ScheduledPaymentDao
+import com.example.paycheck2paycheck.data.local.dao.StreakDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

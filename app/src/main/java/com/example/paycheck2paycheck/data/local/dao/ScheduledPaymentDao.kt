@@ -1,7 +1,11 @@
 package com.example.paycheck2paycheck.data.local.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.example.paycheck2paycheck.data.local.entity.ScheduledPaymentEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ScheduledPaymentDao {
@@ -9,7 +13,7 @@ interface ScheduledPaymentDao {
     suspend fun getById(id: String): ScheduledPaymentEntity?
 
     @Query("SELECT * FROM scheduled_payments WHERE budgetId = :budgetId")
-    suspend fun getByBudgetId(budgetId: String): List<ScheduledPaymentEntity>  // ← ДОБАВЬ
+    fun getByBudgetId(budgetId: String): Flow<List<ScheduledPaymentEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(payment: ScheduledPaymentEntity)

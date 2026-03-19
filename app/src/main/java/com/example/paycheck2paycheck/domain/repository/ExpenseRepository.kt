@@ -1,9 +1,10 @@
 package com.example.paycheck2paycheck.domain.repository
 
 import com.example.paycheck2paycheck.domain.model.Expense
+import kotlinx.coroutines.flow.Flow
 
 interface ExpenseRepository {
     suspend fun getExpenseById(id: String): Expense?
-    suspend fun getExpensesByBudgetId(budgetId: String): List<Expense>
+    fun getExpensesByBudgetId(id: String): Flow<List<Expense>>
     suspend fun addExpense(expense: Expense)
 }

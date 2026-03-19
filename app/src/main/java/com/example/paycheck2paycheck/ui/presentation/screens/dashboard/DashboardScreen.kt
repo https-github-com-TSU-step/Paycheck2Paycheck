@@ -23,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.remote.creation.first
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -49,7 +48,8 @@ fun DashboardScreen(
     state: DashboardState = DashboardState(),
     onAddExpenseClick: () -> Unit = {},
     onVoiceExpenseClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onHistoryClick: () -> Unit = {}
 ) {
     var currentTab by remember { mutableIntStateOf(0) }
 
@@ -58,7 +58,7 @@ fun DashboardScreen(
             BottomMenu(
                 currentTab = currentTab,
                 onMainClick = { currentTab = 0 },
-                onHistoryClick = { currentTab = 1 }
+                onHistoryClick = onHistoryClick
             )
         },
         floatingActionButton = {
@@ -98,7 +98,7 @@ fun DashboardScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             MainTopBar(
-                currentDate = "24 Февраля",
+                currentDate = state.currentDate,
                 onSettingsClick = onSettingsClick
             )
 

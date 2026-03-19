@@ -1,7 +1,11 @@
 package com.example.paycheck2paycheck.domain.usecase
 
-import com.example.paycheck2paycheck.domain.model.*
-import com.example.paycheck2paycheck.domain.repository.*
+import com.example.paycheck2paycheck.domain.model.Expense
+import com.example.paycheck2paycheck.domain.model.RecordingMethod
+import com.example.paycheck2paycheck.domain.repository.BudgetRepository
+import com.example.paycheck2paycheck.domain.repository.ExpenseRepository
+import com.example.paycheck2paycheck.domain.repository.ScheduledPaymentRepository
+import kotlinx.coroutines.flow.first
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -31,8 +35,7 @@ class AddExpenseManually @Inject constructor(
         // Новый remainingAmount
         val newRemaining = budget.remainingAmount - amount
 
-        // Расчёт нового лимита напрямую здесь
-        val scheduledPayments = scheduledPaymentRepository.getByBudgetId(budgetId)
+        val scheduledPayments = scheduledPaymentRepository.getByBudgetId(budgetId).first()
         val unpaidAmount = scheduledPayments.filter { !it.isPaid }.sumOf { it.amount }
         val daysLeft = getRemainingDays(budget.startDate, budget.endDate)
         val availableFunds = newRemaining - unpaidAmount
