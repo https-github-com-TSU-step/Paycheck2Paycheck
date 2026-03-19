@@ -4,14 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.paycheck2paycheck.domain.repository.BudgetRepository
 import com.example.paycheck2paycheck.domain.repository.ExpenseRepository
-import com.example.paycheck2paycheck.domain.repository.StreakRepository // Предполагаем, что у тебя есть этот интерфейс
+import com.example.paycheck2paycheck.domain.repository.StreakRepository
 import com.example.paycheck2paycheck.domain.usecase.CalculateDailyLimitUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -60,6 +62,15 @@ class DashboardViewModel @Inject constructor(
                 }
             }
         }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = DashboardState(isLoading = true) // Экран сразу знает, что нужно подождать
+        )
+
+    private fun formatCurrentDate(): String {
+        val now = LocalDateTime.now()
+        return now.format(DateTimeFormatter.ofPattern("d MMMM", Locale("ru")))
     }
 
     private fun formatMoney(amount: Double): String {

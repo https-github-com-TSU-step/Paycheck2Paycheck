@@ -49,7 +49,8 @@ fun DashboardScreen(
     state: DashboardState = DashboardState(),
     onAddExpenseClick: () -> Unit = {},
     onVoiceExpenseClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onHistoryClick: () -> Unit = {}
 ) {
     var currentTab by remember { mutableIntStateOf(0) }
 
@@ -58,7 +59,7 @@ fun DashboardScreen(
             BottomMenu(
                 currentTab = currentTab,
                 onMainClick = { currentTab = 0 },
-                onHistoryClick = { currentTab = 1 }
+                onHistoryClick = onHistoryClick
             )
         },
         floatingActionButton = {
@@ -98,7 +99,7 @@ fun DashboardScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             MainTopBar(
-                currentDate = "24 Февраля",
+                currentDate = state.currentDate,
                 onSettingsClick = onSettingsClick
             )
 

@@ -5,6 +5,7 @@ import com.example.paycheck2paycheck.domain.model.Expense
 import com.example.paycheck2paycheck.domain.model.RecordingMethod
 import com.example.paycheck2paycheck.domain.repository.BudgetRepository
 import com.example.paycheck2paycheck.domain.repository.VoiceRepository
+import kotlinx.coroutines.flow.first
 import java.io.File
 import java.time.LocalDateTime
 import java.util.UUID

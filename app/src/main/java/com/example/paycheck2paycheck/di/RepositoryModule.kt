@@ -1,7 +1,13 @@
 package com.example.paycheck2paycheck.di
 
-import com.example.paycheck2paycheck.data.repository.*
-import com.example.paycheck2paycheck.domain.repository.*
+import com.example.paycheck2paycheck.data.repository.BudgetRepositoryImpl
+import com.example.paycheck2paycheck.data.repository.ExpenseRepositoryImpl
+import com.example.paycheck2paycheck.data.repository.ScheduledPaymentRepositoryImpl
+import com.example.paycheck2paycheck.data.repository.StreakRepositoryImpl
+import com.example.paycheck2paycheck.domain.repository.BudgetRepository
+import com.example.paycheck2paycheck.domain.repository.ExpenseRepository
+import com.example.paycheck2paycheck.domain.repository.ScheduledPaymentRepository
+import com.example.paycheck2paycheck.domain.repository.StreakRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

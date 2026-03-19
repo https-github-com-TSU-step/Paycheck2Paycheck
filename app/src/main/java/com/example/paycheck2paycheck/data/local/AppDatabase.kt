@@ -4,8 +4,16 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.paycheck2paycheck.data.local.converters.Converters
-import com.example.paycheck2paycheck.data.local.dao.*
-import com.example.paycheck2paycheck.data.local.entity.*
+import com.example.paycheck2paycheck.data.local.dao.BudgetDao
+import com.example.paycheck2paycheck.data.local.dao.ExpenseDao
+import com.example.paycheck2paycheck.data.local.dao.PendingAudioDao
+import com.example.paycheck2paycheck.data.local.dao.ScheduledPaymentDao
+import com.example.paycheck2paycheck.data.local.dao.StreakDao
+import com.example.paycheck2paycheck.data.local.entity.BudgetEntity
+import com.example.paycheck2paycheck.data.local.entity.ExpenseEntity
+import com.example.paycheck2paycheck.data.local.entity.PendingAudioEntity
+import com.example.paycheck2paycheck.data.local.entity.ScheduledPaymentEntity
+import com.example.paycheck2paycheck.data.local.entity.StreakEntity
 
 @Database(
     entities = [

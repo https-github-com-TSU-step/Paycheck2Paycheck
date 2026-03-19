@@ -1,6 +1,10 @@
 package com.example.paycheck2paycheck.data.local.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.example.paycheck2paycheck.data.local.entity.ExpenseEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -11,7 +15,7 @@ interface ExpenseDao {
     suspend fun getExpenseById(id: String): ExpenseEntity?
 
     @Query("SELECT * FROM expenses WHERE budgetId = :budgetId ORDER BY date DESC")
-    suspend fun getExpensesByBudgetId(budgetId: String): List<ExpenseEntity>
+    fun getExpensesByBudgetId(budgetId: String): Flow<List<ExpenseEntity>>
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(expense: ExpenseEntity)
 

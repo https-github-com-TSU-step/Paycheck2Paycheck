@@ -1,13 +1,18 @@
 package com.example.paycheck2paycheck.data.local.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import com.example.paycheck2paycheck.data.local.entity.StreakEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface StreakDao {
 
     @Query("SELECT * FROM streaks WHERE budgetId = :budgetId LIMIT 1")
-    suspend fun getByBudgetId(budgetId: String): StreakEntity?
+    fun getByBudgetIdFlow(budgetId: String): Flow<StreakEntity?>
 
     @Query("SELECT * FROM streaks LIMIT 1")
     suspend fun getStreak(): StreakEntity?

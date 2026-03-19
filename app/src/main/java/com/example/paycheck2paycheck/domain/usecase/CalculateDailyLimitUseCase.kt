@@ -3,6 +3,7 @@ package com.example.paycheck2paycheck.domain.usecase
 import com.example.paycheck2paycheck.domain.model.Budget
 import com.example.paycheck2paycheck.domain.repository.BudgetRepository
 import com.example.paycheck2paycheck.domain.repository.ScheduledPaymentRepository
+import kotlinx.coroutines.flow.first
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
@@ -13,7 +14,7 @@ class CalculateDailyLimitUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(budget: Budget): Double {
 
-        val scheduledPayments = scheduledPaymentRepository.getByBudgetId(budget.id)
+        val scheduledPayments = scheduledPaymentRepository.getByBudgetId(budgetId).first()
 
         val daysLeft = getRemainingDays(budget.startDate, budget.endDate)
 

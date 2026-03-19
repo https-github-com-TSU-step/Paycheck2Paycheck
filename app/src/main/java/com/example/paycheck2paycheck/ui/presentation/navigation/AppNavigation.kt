@@ -9,6 +9,7 @@ import com.example.paycheck2paycheck.ui.presentation.screens.addexpense.AddExpen
 import com.example.paycheck2paycheck.ui.presentation.screens.budget.BudgetSetupScreen
 import com.example.paycheck2paycheck.ui.presentation.screens.dashboard.DashboardScreen
 import com.example.paycheck2paycheck.ui.presentation.screens.dashboard.DashboardViewModel
+import com.example.paycheck2paycheck.ui.presentation.screens.history.HistoryScreen
 
 @Composable
 fun AppNavigation() {
@@ -55,6 +56,12 @@ fun AppNavigation() {
                         ?.set("reload", true)
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable("history") {
+            HistoryScreen(
+                onMainClick = { navController.popBackStack() }
             )
         }
     }

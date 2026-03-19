@@ -1,7 +1,17 @@
 package com.example.paycheck2paycheck.data.mapper
 
-import com.example.paycheck2paycheck.data.local.entity.*
-import com.example.paycheck2paycheck.domain.model.*
+import com.example.paycheck2paycheck.data.local.entity.BudgetEntity
+import com.example.paycheck2paycheck.data.local.entity.ExpenseEntity
+import com.example.paycheck2paycheck.data.local.entity.PendingAudioEntity
+import com.example.paycheck2paycheck.data.local.entity.ScheduledPaymentEntity
+import com.example.paycheck2paycheck.data.local.entity.StreakEntity
+import com.example.paycheck2paycheck.domain.model.Budget
+import com.example.paycheck2paycheck.domain.model.Expense
+import com.example.paycheck2paycheck.domain.model.RecognitionStatus
+import com.example.paycheck2paycheck.domain.model.RecordingMethod
+import com.example.paycheck2paycheck.domain.model.ScheduledPayment
+import com.example.paycheck2paycheck.domain.model.Streak
+import com.example.paycheck2paycheck.domain.model.VoiceRecording
 
 // Expense Mapper
 fun ExpenseEntity.toDomain(): Expense = Expense(

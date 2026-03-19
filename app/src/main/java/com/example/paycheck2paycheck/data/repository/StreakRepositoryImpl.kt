@@ -5,6 +5,7 @@ import com.example.paycheck2paycheck.data.mapper.toDomain
 import com.example.paycheck2paycheck.data.mapper.toEntity
 import com.example.paycheck2paycheck.domain.model.Streak
 import com.example.paycheck2paycheck.domain.repository.StreakRepository
+import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 
 class StreakRepositoryImpl @Inject constructor(
@@ -12,8 +13,9 @@ class StreakRepositoryImpl @Inject constructor(
 ) : StreakRepository {
 
     override suspend fun getStreak(budgetId: String): Streak? {
-        // Берем Entity из БД и превращаем в доменную модель через маппер
-        return streakDao.getByBudgetId(budgetId)?.toDomain()
+        return streakDao.getByBudgetIdFlow(budgetId)
+            .firstOrNull()
+            ?.toDomain()
     }
 
     override suspend fun updateStreak(streak: Streak) {
