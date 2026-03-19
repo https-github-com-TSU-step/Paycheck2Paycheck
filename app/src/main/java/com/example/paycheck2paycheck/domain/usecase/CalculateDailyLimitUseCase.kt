@@ -1,5 +1,6 @@
 package com.example.paycheck2paycheck.domain.usecase
 
+import com.example.paycheck2paycheck.domain.model.Budget
 import com.example.paycheck2paycheck.domain.repository.BudgetRepository
 import com.example.paycheck2paycheck.domain.repository.ScheduledPaymentRepository
 import kotlinx.coroutines.flow.first
@@ -9,12 +10,9 @@ import javax.inject.Inject
 import kotlin.math.max
 
 class CalculateDailyLimitUseCase @Inject constructor(
-    private val budgetRepository: BudgetRepository,
     private val scheduledPaymentRepository: ScheduledPaymentRepository
 ) {
-    suspend operator fun invoke(budgetId: String): Double {
-        val budget = budgetRepository.getBudgetById(budgetId)
-            ?: throw Exception("Бюджет не найден")
+    suspend operator fun invoke(budget: Budget): Double {
 
         val scheduledPayments = scheduledPaymentRepository.getByBudgetId(budgetId).first()
 
@@ -28,13 +26,10 @@ class CalculateDailyLimitUseCase @Inject constructor(
 
         return if (daysLeft > 0) availableFunds / daysLeft else availableFunds
     }
-
-    private fun getRemainingDays(startDate: LocalDateTime, endDate: LocalDateTime): Int {
+    private fun getRemainingDays(st: LocalDateTime, end: LocalDateTime): Int {
         val now = LocalDateTime.now()
-        if (now.isAfter(endDate)) return 0
-        if (now.isBefore(startDate)) {
-            return ChronoUnit.DAYS.between(startDate.toLocalDate(), endDate.toLocalDate()).toInt()
-        }
-        return max(1, ChronoUnit.DAYS.between(now.toLocalDate(), endDate.toLocalDate()).toInt())
+        if (now > end) return 0
+        else if (now < st) return ChronoUnit.DAYS.between(st.toLocalDate(), end.toLocalDate()).toInt()
+        else return max(1, ChronoUnit.DAYS.between(now.toLocalDate(), end.toLocalDate()).toInt())
     }
 }

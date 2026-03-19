@@ -8,5 +8,5 @@ data class ScheduledPayment(
     override val amount: Double,
     override val date: LocalDateTime,
     override val budgetId: String,
-    val isPaid: Boolean = false // Теперь val
+    val isPaid: Boolean = false
 ) : MoneyOperation()
