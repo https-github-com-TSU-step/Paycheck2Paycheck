@@ -16,6 +16,7 @@ import com.example.paycheck2paycheck.ui.presentation.screens.budget.BudgetSetupS
 import com.example.paycheck2paycheck.ui.presentation.screens.dashboard.DashboardScreen
 import com.example.paycheck2paycheck.ui.presentation.screens.dashboard.DashboardViewModel
 import com.example.paycheck2paycheck.ui.presentation.screens.history.HistoryScreen
+import com.example.paycheck2paycheck.ui.presentation.screens.history.HistoryViewModel
 
 @Composable
 fun AppNavigation() {
@@ -66,9 +67,15 @@ fun AppNavigation() {
             )
         }
 
-        composable("history") {
+        composable("history") { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("history")
+            }
+            val viewModel: HistoryViewModel = hiltViewModel(parentEntry)
+
             HistoryScreen(
-                onMainClick = { navController.popBackStack() }
+                onMainClick = { navController.popBackStack() },
+                onCreateBudgetClick = { navController.navigate("setup") }
             )
         }
     }

@@ -24,14 +24,17 @@ class GetTransactionHistoryUseCase @Inject constructor(
 ) {
     operator fun invoke(): Flow<TransactionHistory> {
         return budgetRepository.getLatestBudgetFlow().flatMapLatest { budget ->
-            if (budget == null) return@flatMapLatest flowOf(TransactionHistory(0.0, emptyList(), emptyList()))
+            if (budget == null) {
+                return@flatMapLatest flowOf(TransactionHistory(0.0, emptyList(), emptyList()))
+            }
 
             combine(
+                flowOf(budget),
                 expenseRepository.getExpensesByBudgetId(budget.id),
                 scheduledPaymentRepository.getByBudgetId(budget.id)
-            ) { expenses, scheduled ->
+            ) { currentBudget, expenses, scheduled ->
                 TransactionHistory(
-                    totalRemaining = budget.remainingAmount,
+                    totalRemaining = currentBudget.remainingAmount,
                     scheduledPayments = scheduled.filter { !it.isPaid },
                     expenses = expenses.sortedByDescending { it.date }
                 )

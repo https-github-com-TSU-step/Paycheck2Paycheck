@@ -8,5 +8,6 @@ data class HistoryState(
     val daysLeft: Int = 0,
     val scheduledPayments: List<ScheduledPayment> = emptyList(),
     val expenses: List<Expense> = emptyList(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val hasLoadedOnce: Boolean = false
 )

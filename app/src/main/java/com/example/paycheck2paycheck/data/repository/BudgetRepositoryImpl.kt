@@ -8,6 +8,7 @@ import com.example.paycheck2paycheck.data.local.entity.StreakEntity
 import com.example.paycheck2paycheck.data.mapper.toDomain
 import com.example.paycheck2paycheck.data.mapper.toEntity
 import com.example.paycheck2paycheck.domain.model.Budget
+import com.example.paycheck2paycheck.domain.model.Streak
 import com.example.paycheck2paycheck.domain.repository.BudgetRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -60,14 +61,27 @@ class BudgetRepositoryImpl @Inject constructor(
 
     override fun getLatestBudgetFlow(): Flow<Budget?> {
         return budgetDao.getLatestBudgetFlow().flatMapLatest { budgetEntity ->
-            if (budgetEntity == null) return@flatMapLatest flowOf(null)
+            if (budgetEntity == null) {
+                return@flatMapLatest flowOf(null)
+            }
 
-            // Берем поток стрика для этого конкретного бюджета
             streakDao.getByBudgetIdFlow(budgetEntity.id).map { streakEntity ->
                 val streak = streakEntity?.toDomain()
-                // Передаем стрик в маппер бюджета
-                budgetEntity.toDomain(streak!!)
+                if (streak != null) {
+                    budgetEntity.toDomain(streak)
+                } else {
+                    val defaultStreak = Streak(
+                        id = "",
+                        budgetId = budgetEntity.id,
+                        currentStreak = 0,
+                        longestStreak = 0,
+                        totalDaysTracked = 0,
+                        lastRecordedDate = null
+                    )
+                    budgetEntity.toDomain(defaultStreak)
+                }
             }
         }
     }
+
 }
