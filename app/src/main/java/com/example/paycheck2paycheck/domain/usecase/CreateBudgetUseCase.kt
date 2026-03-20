@@ -26,7 +26,8 @@ class CreateBudgetUseCase @Inject constructor(
             dailyLimit = initialDailyLimit,
             remainingAmount = amount,
             createdAt = now,
-            updatedAt = now
+            updatedAt = now,
+            curDayBudget = initialDailyLimit
         )
 
         budgetRepository.insertBudget(newBudget)

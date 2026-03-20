@@ -1,5 +1,6 @@
 package com.example.paycheck2paycheck.data.mapper
 
+import androidx.compose.runtime.currentComposer
 import com.example.paycheck2paycheck.data.local.entity.BudgetEntity
 import com.example.paycheck2paycheck.data.local.entity.ExpenseEntity
 import com.example.paycheck2paycheck.data.local.entity.PendingAudioEntity
@@ -65,6 +66,7 @@ fun BudgetEntity.toDomain(streak: Streak): Budget =
         remainingAmount = remainingAmount,
         createdAt = createdAt,
         updatedAt = updatedAt,
+        curDayBudget = curDayBudget
     )
 fun Budget.toEntity(): BudgetEntity = BudgetEntity(
     id = id,
@@ -74,7 +76,8 @@ fun Budget.toEntity(): BudgetEntity = BudgetEntity(
     dailyLimit = dailyLimit,
     remainingAmount = remainingAmount,
     createdAt = createdAt,
-    updatedAt = updatedAt
+    updatedAt = updatedAt,
+    curDayBudget = curDayBudget
 )
 
 fun StreakEntity.toDomain(): Streak = Streak(

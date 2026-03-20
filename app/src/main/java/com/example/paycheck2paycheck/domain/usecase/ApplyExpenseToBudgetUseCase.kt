@@ -21,6 +21,12 @@ class ApplyExpenseToBudgetUseCase @Inject constructor(
         val todayExpenses = getExpensesForDayUseCase.getExpensesForDay(budget.id, now)
         val todaySpent = todayExpenses.sumOf { it.amount }
 
+        println("DEBUG: budget.id=${budget.id}")
+        println("DEBUG: expense.amount=${expense.amount}")
+        println("DEBUG: todaySpent=$todaySpent")
+        println("DEBUG: budget.dailyLimit=${budget.dailyLimit}")
+        println("DEBUG: budget.remainingAmount=${budget.remainingAmount}")
+
         val isLimitSum = (todaySpent + expense.amount) > budget.dailyLimit
         val isAllLimitSum = expense.amount > budget.remainingAmount
         val newRemaining = if (isAllLimitSum) {
@@ -28,20 +34,31 @@ class ApplyExpenseToBudgetUseCase @Inject constructor(
         } else {
             budget.remainingAmount - expense.amount
         }
+        println("DEBUG: isLimitSum=$isLimitSum, isAllLimitSum=$isAllLimitSum, newRemaining=$newRemaining")
 
         val newDailyLimit = if (isLimitSum){
             val newBudget = budget.copy(
-                remainingAmount =newRemaining
+                remainingAmount = newRemaining
             )
-            calcDailyLimit(newBudget)
-        }else budget.dailyLimit
+            calcDailyLimit(newBudget).also { println("DEBUG: recalculated dailyLimit = $it") }
+        }else {
+            println("DEBUG: keeping old dailyLimit = ${budget.dailyLimit}")
+            budget.dailyLimit
+        }
+        val newCurDayBudget = if(budget.dailyLimit == newDailyLimit){
+            budget.curDayBudget - expense.amount
+        }else{
+            0.0
+        }
+
 
         val updatedBudget = budget.copy(
             remainingAmount = newRemaining,
             dailyLimit = newDailyLimit,
-            updatedAt = LocalDateTime.now()
+            updatedAt = LocalDateTime.now(),
+            curDayBudget = newCurDayBudget,
         )
-
+        println("DEBUG: updatedBudget = $updatedBudget")
         expenseRepository.addExpense(expense)
         budgetRepository.updateBudget(updatedBudget)
 

@@ -23,7 +23,7 @@ import com.example.paycheck2paycheck.data.local.entity.StreakEntity
         StreakEntity::class,
         PendingAudioEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

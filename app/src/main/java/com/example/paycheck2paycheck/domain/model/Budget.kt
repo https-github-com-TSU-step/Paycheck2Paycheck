@@ -8,6 +8,7 @@ data class Budget(
     val startDate: LocalDateTime,
     val endDate: LocalDateTime,
     val dailyLimit: Double,
+    val curDayBudget: Double,
     val remainingAmount: Double,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime

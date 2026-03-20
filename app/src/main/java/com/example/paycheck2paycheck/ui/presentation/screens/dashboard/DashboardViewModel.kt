@@ -55,10 +55,10 @@ class DashboardViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         currentDate = currentDate,
-                        dailyBudget = formatMoney(dailyLimit),
+                        dailyBudget = formatMoney(budget.curDayBudget),
                         remainingAmount = formatMoney(budget.remainingAmount),
                         spentToday = formatMoney(spentToday),
-                        averageDaily = formatMoney(dailyLimit),
+                        averageDaily = formatMoney(budget.dailyLimit),
                         currentStreak = streak?.currentStreak ?: 0,
                         bestStreak = streak?.longestStreak ?: 0,
                         recentTransactions = expenses.take(5)

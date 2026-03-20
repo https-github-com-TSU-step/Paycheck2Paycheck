@@ -13,5 +13,6 @@ data class BudgetEntity(
     val dailyLimit: Double,
     val remainingAmount: Double,
     val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val updatedAt: LocalDateTime,
+    val curDayBudget: Double
 )
