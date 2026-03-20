@@ -1,5 +1,6 @@
 package com.example.paycheck2paycheck.ui.presentation.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,10 +22,13 @@ import com.example.paycheck2paycheck.ui.presentation.theme.Paycheck2PaycheckThem
 fun TransactionItem(
     name: String,
     time: String,
-    amount: String
+    amount: String,
+    onClick: () -> Unit
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(12.dp),
         shadowElevation = 1.dp
@@ -33,6 +37,7 @@ fun TransactionItem(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
+
         ) {
             Column {
                 Text(
@@ -62,7 +67,8 @@ fun TransactionItemPreview() {
         TransactionItem(
             name = "кал",
             time = "12:30",
-            amount = "500 ₽"
+            amount = "500 ₽",
+            onClick = TODO()
         )
     }
 }

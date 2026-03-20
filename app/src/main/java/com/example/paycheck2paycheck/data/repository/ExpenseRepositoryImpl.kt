@@ -22,6 +22,9 @@ class ExpenseRepositoryImpl @Inject constructor(
             entities.map { it.toDomain() }
         }
     }
+    override suspend fun updateExpense(expense: Expense) {
+        expenseDao.update(expense.toEntity())
+    }
 
     override suspend fun addExpense(expense: Expense) {
         expenseDao.insert(expense.toEntity())

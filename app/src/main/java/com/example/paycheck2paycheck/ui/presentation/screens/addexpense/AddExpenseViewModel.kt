@@ -2,10 +2,13 @@ package com.example.paycheck2paycheck.ui.presentation.screens.addexpense
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.paycheck2paycheck.domain.model.Expense
 import com.example.paycheck2paycheck.domain.model.ScheduledPayment
 import com.example.paycheck2paycheck.domain.repository.BudgetRepository
+import com.example.paycheck2paycheck.domain.repository.ExpenseRepository
 import com.example.paycheck2paycheck.domain.repository.ScheduledPaymentRepository
 import com.example.paycheck2paycheck.domain.usecase.AddExpenseManually
+import com.example.paycheck2paycheck.domain.usecase.UpdateExpenseInBudgetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,14 +25,18 @@ import javax.inject.Inject
 @HiltViewModel
 class AddExpenseViewModel @Inject constructor(
     private val addExpenseManually: AddExpenseManually,
-    private val scheduledPaymentRepository: ScheduledPaymentRepository, // ← добавили
-    private val budgetRepository: BudgetRepository
+    private val scheduledPaymentRepository: ScheduledPaymentRepository,
+    private val budgetRepository: BudgetRepository,
+    private val updateExpenseInBudget: UpdateExpenseInBudgetUseCase,
+    private val expenseRepository: ExpenseRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddExpenseState())
     val state: StateFlow<AddExpenseState> = _state.asStateFlow()
 
     private val dateFormatter = DateTimeFormatter.ofPattern("d MMM, yyyy", Locale("ru"))
+
+    private var editingExpenseId: String? = null
 
     init {
         updateCurrentDateTime()
@@ -88,22 +95,25 @@ class AddExpenseViewModel @Inject constructor(
 
                 val budget = budgetRepository.getLatestBudget()
                     ?: throw Exception("Бюджет не найден. Создайте бюджет в настройках.")
+                if(editingExpenseId != null){
+                    updateExpenseInBudget.updateExpense(editingExpenseId!!, amount, description, budget.id)
+                }else {
+                    if (_state.value.isScheduled) {
+                        val scheduledDate = _state.value.scheduledDate
+                            ?: throw Exception("Выберите дату запланированного платежа")
 
-                if (_state.value.isScheduled) {
-                    val scheduledDate = _state.value.scheduledDate
-                        ?: throw Exception("Выберите дату запланированного платежа")
-
-                    val payment = ScheduledPayment(
-                        id = UUID.randomUUID().toString(),
-                        name = description,
-                        amount = amount,
-                        date = scheduledDate.atStartOfDay(), // можно .atTime(10, 0) если нужно время
-                        budgetId = budget.id,
-                        isPaid = false
-                    )
-                    scheduledPaymentRepository.save(payment)
-                } else {
-                    addExpenseManually.execute(amount, description, budget.id)
+                        val payment = ScheduledPayment(
+                            id = UUID.randomUUID().toString(),
+                            name = description,
+                            amount = amount,
+                            date = scheduledDate.atStartOfDay(),
+                            budgetId = budget.id,
+                            isPaid = false
+                        )
+                        scheduledPaymentRepository.save(payment)
+                    } else {
+                        addExpenseManually.execute(amount, description, budget.id)
+                    }
                 }
 
                 _state.update { it.copy(isLoading = false, isSuccess = true) }
@@ -113,7 +123,28 @@ class AddExpenseViewModel @Inject constructor(
         }
     }
 
+    fun loadExpenseForEditing(expenseId: String?){
+        editingExpenseId = expenseId
+
+        viewModelScope.launch {
+            try{
+                if(expenseId!=null){
+                    val oldExpense = expenseRepository.getExpenseById(expenseId)
+                        ?: throw Exception("Трата не найдена")
+
+                    _state.update { it.copy(
+                        amount = oldExpense.amount.toString(),
+                        description = oldExpense.name
+                    ) }
+                }
+            }catch (e: Exception) {
+                _state.update { it.copy(error = e.message) }
+            }
+        }
+    }
+
     fun reset() {
+        editingExpenseId = null
         _state.value = AddExpenseState()
         updateCurrentDateTime()
     }
