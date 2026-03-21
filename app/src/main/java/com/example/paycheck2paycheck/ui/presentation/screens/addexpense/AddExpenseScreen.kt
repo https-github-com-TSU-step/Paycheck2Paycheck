@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -58,11 +59,20 @@ import java.time.ZoneId
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddExpenseBottomSheet(
+    expenseId: String? = null,
     viewModel: AddExpenseViewModel = hiltViewModel(),
     onDismiss: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    LaunchedEffect(expenseId) {
+        if(expenseId != null){
+            viewModel.loadExpenseForEditing(expenseId)
+        }else{
+            viewModel.reset()
+        }
+    }
 
     LaunchedEffect(state.isSuccess) {
         if (state.isSuccess) {

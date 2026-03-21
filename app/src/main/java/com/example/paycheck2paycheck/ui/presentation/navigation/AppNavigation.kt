@@ -27,6 +27,8 @@ fun AppNavigation() {
             val viewModel: DashboardViewModel = hiltViewModel()
             val state by viewModel.state.collectAsState()
             var showAddExpenseSheet by remember { mutableStateOf(false) }
+            var selectedExpenseId  by remember {mutableStateOf<String?>(null)}
+
 
             val savedStateHandle = backStackEntry.savedStateHandle
             val shouldReload by savedStateHandle.getStateFlow("reload", false).collectAsState()
@@ -40,7 +42,14 @@ fun AppNavigation() {
 
             DashboardScreen(
                 state = state,
-                onAddExpenseClick = { showAddExpenseSheet = true },
+                onAddExpenseClick = {
+                    showAddExpenseSheet = true
+                    selectedExpenseId = null
+                    },
+                onTransactionClick = { expenseId ->
+                    selectedExpenseId = expenseId
+                    showAddExpenseSheet = true
+                },
                 onSettingsClick = { navController.navigate("setup") },
                 onHistoryClick = { navController.navigate("history") }
             )

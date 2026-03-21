@@ -47,6 +47,7 @@ import java.time.LocalDateTime
 fun DashboardScreen(
     state: DashboardState = DashboardState(),
     onAddExpenseClick: () -> Unit = {},
+    onTransactionClick: (String)  -> Unit = {},
     onVoiceExpenseClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onHistoryClick: () -> Unit = {}
@@ -170,7 +171,7 @@ fun DashboardScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(state.recentTransactions.size) { index ->
-                            val expense = state.recentTransactions[index] // Теперь это объект Expense
+                            val expense = state.recentTransactions[index]
 
                             val formattedTime = remember(expense.date) {
                                 expense.date.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
@@ -181,9 +182,12 @@ fun DashboardScreen(
                             }
 
                             TransactionItem(
-                                name = expense.name,        // Было .first
-                                time = formattedTime,       // Был хардкод "Сегодня"
-                                amount = "- $formattedAmount" // Было .second
+                                name = expense.name,
+                                time = formattedTime,
+                                amount = "- $formattedAmount",
+                                onClick = {
+                                    onTransactionClick(expense.id)
+                                }
                             )
                         }
                     }
