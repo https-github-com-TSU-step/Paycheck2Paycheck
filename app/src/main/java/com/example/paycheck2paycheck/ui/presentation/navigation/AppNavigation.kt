@@ -1,12 +1,6 @@
 package com.example.paycheck2paycheck.ui.presentation.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,7 +10,6 @@ import com.example.paycheck2paycheck.ui.presentation.screens.budget.BudgetSetupS
 import com.example.paycheck2paycheck.ui.presentation.screens.dashboard.DashboardScreen
 import com.example.paycheck2paycheck.ui.presentation.screens.dashboard.DashboardViewModel
 import com.example.paycheck2paycheck.ui.presentation.screens.history.HistoryScreen
-import com.example.paycheck2paycheck.ui.presentation.screens.history.HistoryViewModel
 
 @Composable
 fun AppNavigation() {
@@ -31,6 +24,10 @@ fun AppNavigation() {
             val savedStateHandle = backStackEntry.savedStateHandle
             val shouldReload by savedStateHandle.getStateFlow("reload", false).collectAsState()
 
+            LaunchedEffect(Unit) {
+                viewModel.loadBudget()
+            }
+
             LaunchedEffect(shouldReload) {
                 if (shouldReload) {
                     viewModel.loadBudget()
@@ -41,6 +38,7 @@ fun AppNavigation() {
             DashboardScreen(
                 state = state,
                 onAddExpenseClick = { showAddExpenseSheet = true },
+                onVoiceExpenseClick = {},
                 onSettingsClick = { navController.navigate("setup") },
                 onHistoryClick = { navController.navigate("history") }
             )
@@ -67,12 +65,7 @@ fun AppNavigation() {
             )
         }
 
-        composable("history") { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry("history")
-            }
-            val viewModel: HistoryViewModel = hiltViewModel(parentEntry)
-
+        composable("history") {
             HistoryScreen(
                 onMainClick = { navController.popBackStack() },
                 onCreateBudgetClick = { navController.navigate("setup") }
